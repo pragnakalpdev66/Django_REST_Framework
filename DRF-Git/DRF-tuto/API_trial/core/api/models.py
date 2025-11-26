@@ -1,4 +1,4 @@
-from django.db import models
+from django.db import models # type: ignore
 from django.forms import ValidationError # type: ignore
 
 class Book(models.Model):

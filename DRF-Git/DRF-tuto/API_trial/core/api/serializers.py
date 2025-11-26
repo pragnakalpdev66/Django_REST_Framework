@@ -1,10 +1,6 @@
-from rest_framework import serializers
+from rest_framework import serializers # type: ignore
 from .models import Book, Task, Author, Product
-# Create a serializer that: 
-# - Includes all fields from Book model 
-# - Adds a computed field is_recent (True if created in last 7 days) 
-# - Excludes updated_at from response 
-# - Makes isbn optional when creating
+
 class BookSerializer(serializers.ModelSerializer):
     class Meta:
         model = Book
