@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from rest_framework.views import exception_handler
-from rest_framework import viewsets
+from rest_framework import viewsets, filters
 from .models import Book, Task, Author, Product, CustomUser
 # from django.contrib.auth.models import CustomUser # type: ignore
 from .serializers import BookSerializer, TaskSerializer, AuthorSerializer, ProductSerializer
@@ -8,6 +8,8 @@ from rest_framework.response import Response
 from rest_framework import status, generics
 from rest_framework_simplejwt.tokens import RefreshToken
 from .serializers import UserRegistrationSerializer
+from rest_framework.permissions import AllowAny
+from rest_framework.pagination import LimitOffsetPagination
 
 class BookViewSet(viewsets.ModelViewSet):
     queryset = Book.objects.all()
@@ -24,8 +26,17 @@ class BookViewSet(viewsets.ModelViewSet):
         })
 
 class TaskViewSet(viewsets.ModelViewSet):
+    permission_classes = [AllowAny]
+    pagination_class = LimitOffsetPagination
     queryset = Task.objects.all()
     serializer_class = TaskSerializer
+
+
+    filter_backends = [filters.SearchFilter]
+    search_fields = ['title', 'desc'] 
+
+    ordering_fields = ['title', 'completed', 'created_at', 'updated_at']
+    ordering = ['-created_at']
 
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
@@ -36,6 +47,7 @@ class TaskViewSet(viewsets.ModelViewSet):
             'success_message': 'Tasks retrieved successfully',
             'results': serializer.data
         })
+    
 
 class AuthorViewSet(viewsets.ModelViewSet):
     queryset = Author.objects.all()
