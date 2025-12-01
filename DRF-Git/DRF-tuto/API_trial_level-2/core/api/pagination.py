@@ -1,5 +1,4 @@
-from rest_framework.pagination import LimitOffsetPagination
-from rest_framework.pagination import CursorPagination
+from rest_framework.pagination import LimitOffsetPagination, CursorPagination
 
 class BookLimitOffsetPagination(LimitOffsetPagination):
     default_limit = 10

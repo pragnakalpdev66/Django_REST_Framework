@@ -7,6 +7,7 @@ router.register(r'books', views.BookViewSet, basename='book')
 router.register(r'tasks', views.TaskViewSet, basename='task')
 router.register(r'authors', views.AuthorViewSet, basename='author')
 router.register(r'products', views.ProductViewSet, basename='product')
+router.register(r'userprofiles', views.UserProfileViewSet, basename='userprofile')
 
 urlpatterns = [
     path('', include(router.urls)),

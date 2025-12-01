@@ -2,12 +2,27 @@ from django.db import models # type: ignore
 from django.forms import ValidationError # type: ignore
 from django.contrib.auth.models import AbstractUser # type: ignore
 
+# custom user model
+class CustomUser(AbstractUser):
+    phone_number = models.CharField(max_length=15, blank=True)
+    bio = models.TextField(blank=True)
+    avatar = models.ImageField(upload_to='avatars/', blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.username
+
+    class Meta:
+        verbose_name = 'CustomUser'
+        verbose_name_plural = 'CustomUsers'
+
 class Book(models.Model):
     title = models.CharField(max_length=50)
     author = models.CharField(max_length=50)
     published_date = models.DateField(auto_now=False, auto_now_add=False)
     isbn = models.CharField(max_length=50, unique=True, blank=True, null=True)
     description = models.TextField(blank=True)
+    owner = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='books')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -21,21 +36,21 @@ class Book(models.Model):
 
 class Task(models.Model):
     PRIORITY_CHOICES = [
-        ('L','Low'),
-        ('M','medium'),
-        ('H','High')
+        ('3','Low'),
+        ('2','medium'),
+        ('1','High')
     ]
-
     title = models.CharField(max_length=100)
     desc = models.TextField(null=True, blank=True)
     priority = models.CharField(max_length=10, choices=PRIORITY_CHOICES, default='L')
     completed = models.BooleanField(default=False)
-    due_date = models.DateField(auto_now=False, auto_now_add=False, null=True, blank=True)
+    owner = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='tasks')
+    # due_date = models.DateField(auto_now=False, auto_now_add=False, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        ordering = ['-created_at']
+        ordering = ['-priority']
         verbose_name = 'Task'
         verbose_name_plural = 'Tasks'
     
@@ -45,10 +60,6 @@ class Task(models.Model):
     def clean(self):
         if self.completed and not self.desc:
             raise ValidationError('Completed tasks must have a description')
-
-    def save(self, *args, **kwargs):
-        self.full_clean()
-        super().save(*args, **kwargs)
 
 class Author(models.Model):
     name = models.CharField(max_length=100)
@@ -100,16 +111,19 @@ class BlogPost(models.Model):
         verbose_name = 'BlogPost'
         verbose_name_plural = 'BlogPosts'
 
-# custom user model
-class CustomUser(AbstractUser):
-    phone_number = models.CharField(max_length=15, blank=True)
+class UserProfile(models.Model):
+    user = models.OneToOneField(CustomUser, on_delete=models.CASCADE, related_name='profile')
     bio = models.TextField(blank=True)
+    phone_number = models.CharField(max_length=15, blank=True)
     avatar = models.ImageField(upload_to='avatars/', blank=True, null=True)
+    website = models.URLField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return self.username
+        return f"{self.user.username}'s Profile"
 
     class Meta:
-        verbose_name = 'CustomUser'
-        verbose_name_plural = 'CustomUsers'
+        ordering = ['user__username']
+        verbose_name = 'UserProfile'
+        verbose_name_plural = 'UserProfiles'
