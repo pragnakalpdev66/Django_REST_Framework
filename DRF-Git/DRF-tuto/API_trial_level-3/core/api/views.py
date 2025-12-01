@@ -1,6 +1,6 @@
 from django.shortcuts import render
-from .models import Book, Task, Author, Product, CustomUser, UserProfile
-from .serializers import BookSerializer, TaskSerializer, AuthorSerializer, ProductSerializer, UserRegistrationSerializer, UserProfileSerializer
+from .models import Book, Task, Author, Product, CustomUser, UserProfile, Post, Tag , Comments
+from .serializers import BookSerializer, TaskSerializer, AuthorSerializer, ProductSerializer, UserRegistrationSerializer, UserProfileSerializer, PostSerializer
 from rest_framework import viewsets, filters, status, generics
 from rest_framework.views import exception_handler
 from rest_framework.response import Response
@@ -13,6 +13,8 @@ from .permissions import IsOwnerOrReadOnly, IsOwnerOnly
 from .throttles import BookCreateThrottle
 from rest_framework_simplejwt.views import TokenObtainPairView
 from .serializers import LoginSerializer
+from django.db.models import Count
+from .tasks import send_post_notification
 
 
 class BookViewSet(viewsets.ModelViewSet):
@@ -155,3 +157,20 @@ class UserProfileViewSet(viewsets.ModelViewSet):
     
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
+
+class PostView(viewsets.ModelViewSet):
+    # queryset = Post.objects.all()
+    # serializer_class = PostSerializer
+    # permission_classes = [IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]
+
+    # def perform_create(self, serializer):
+    #     serializer.save(author=self.request.user)
+    def get_queryset(self):
+        return Post.objects.select_related('author').prefetch_related(
+            'tags', 'comments', 'comments__author'
+        ).annotate(comment_count=Count('comments')).all()
+    
+class PostViewSet(viewsets.ModelViewSet):
+    def perform_create(self, serializer):
+        post = serializer.save()
+        send_post_notification.delay(post.id)

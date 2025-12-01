@@ -43,9 +43,20 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt',  # JWT
     'corsheaders',     # cors must to add before apps
     'api.apps.ApiConfig',        # created app
+    'dajngo_q',        # django q
 ]
 
 AUTH_USER_MODEL = 'api.CustomUser'  # custom user model
+
+Q_CLUSTER = {
+    'name': 'DjangORM',
+    'workers': 4,
+    'timeout': 90,
+    'retry': 120,
+    'queue_limit': 50,
+    'bulk': 10,
+    'orm': 'default'
+}
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -111,6 +122,9 @@ AUTH_PASSWORD_VALIDATORS = [
 
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/
+
+CELERY_BROKER_URL = 'redis://localhost:6379/0'
+CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
 
 LANGUAGE_CODE = 'en-us'
 
