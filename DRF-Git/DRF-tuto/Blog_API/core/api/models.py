@@ -143,6 +143,10 @@ class Tag(models.Model):
     def __str__(self):
         return self.name
 
+class PublishedPostManager(models.Manager):
+    def get_queryset(self):
+        return super().get_queryset().filter(published=True)
+
 class Post(models.Model):
     title = models.CharField(max_length=200)
     content = models.TextField()
@@ -152,6 +156,9 @@ class Post(models.Model):
     published = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    objects = models.Manager()
+    published_posts = PublishedPostManager()
 
     def __str__(self):
         return self.title

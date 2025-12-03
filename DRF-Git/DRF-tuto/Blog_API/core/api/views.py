@@ -13,8 +13,7 @@ from .permissions import IsOwnerOrReadOnly, IsOwnerOnly
 from .throttles import BookCreateThrottle
 from rest_framework_simplejwt.views import TokenObtainPairView
 from django.db.models import Count 
-from .tasks import send_post_notification
-
+from .task import send_post_notification
 
 class BookViewSet(viewsets.ModelViewSet):
     queryset = Book.objects.all()
